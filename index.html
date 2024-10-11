@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weight Tracker</title>
+    <style>
+      .btn {
+        font-family: "Arial";
+        font-size: 16px;
+        float: right;
+        width: 20%;
+        height: 41px;
+        border: none;
+        color: white;
+        font-weight: bold;
+        border-left: 1px solid #000000;
+        border-top-right-radius: 10px;
+        background-color: #474976;
+      }
+      #weight {
+        box-sizing: border-box;
+        width: 80%;
+        font-size: 2em;
+        color: #474976;
+        border: none;
+        border-top-left-radius: 10px;
+      }
+      .abc {
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+      }
+      body {
+        background-color: #0004ff;
+      }
+      .a {
+        height: auto;
+        width: 80vw;
+        background-color: #fffb00;
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+        filter: drop-shadow(0 0 0.75rem white);
+      }
+      .table {
+        width: 100%;
+        font-size: 1.3em;
+        border-collapse: collapse;
+        text-align: center;
+      }
+      tr,
+      th,
+      td {
+        font-family: "Arial";
+        color: #474976;
+        border: 1px solid #474976;
+        border-left: none;
+      }
+      .right {
+        border-right-color: #fffb00;
+      }
+      .inputf {
+        border-width: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="abc">
+      <div class="a">
+        <div class="inputf">
+          <form id="form">
+            <input id="weight" name="weight" type="number" min="1" step="0.01" required />
+            <button type="submit" class="btn">New Entry</button>
+          </form>
+        </div>
+        <table id="main" class="table">
+          <tr>
+            <th>Weight</th>
+            <th class="right">Date</th>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </body>
+  <script>
+    const div = document.getElementById("main");
+    const form = document.getElementById("form");
+    const weight = document.getElementById("weight");
+
+    window.onload = refresh;
+
+    form.addEventListener("submit", newEntry);
+    function newEntry() {
+      event.preventDefault();
+      localStorage.setItem("Entries", (localStorage.getItem("Entries") ?? "") + (localStorage.getItem("Entries") == null ? "" : ",") + weight.value);
+      localStorage.setItem("Time", (localStorage.getItem("Time") ?? "") + (localStorage.getItem("Time") == null ? "" : ",") + Date.now());
+      refresh();
+    }
+
+    function refresh() {
+      let entries = (localStorage.getItem("Entries") ?? "").split(",");
+      let time = (localStorage.getItem("Time") ?? "").split(",");
+      if (entries[0] == [""] && time[0] == [""]) {
+        div.innerHTML = "";
+        return;
+      }
+      div.innerHTML = "";
+      if (div.innerHTML == "") {
+        div.innerHTML = "<tr><th>Weight</th><th class='right'>Date</th></tr>";
+      }
+      for (let x = 0; x < entries.length; x++) {
+        let d = new Date(Number(time[x]));
+        div.innerHTML += `<tr>
+          <td>${entries[x]}</td>
+          <td class="right">${d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear()}</td>
+        </tr>`;
+      }
+    }
+  </script>
+</html>
