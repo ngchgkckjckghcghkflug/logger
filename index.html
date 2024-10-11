@@ -4,7 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weight Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <style>
+      .topnav {
+        font-family: "Arial";
+        background-color: #333;
+        overflow: hidden;
+      }
+
+      /* Style the links inside the navigation bar */
+      .topnav a {
+        float: left;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+      }
+
+      /* Change the color of links on hover */
+      .topnav a:hover {
+        background-color: #ddd;
+        color: black;
+      }
+
+      /* Add a color to the active/current link */
+      .topnav a.active {
+        background-color: #04aa6d;
+        color: white;
+      }
       .btn {
         font-family: "Arial";
         font-size: 16px;
@@ -66,6 +94,10 @@
     </style>
   </head>
   <body>
+    <div class="topnav">
+      <a class="active" href="javascript:chart()">Chart</a>
+      <a href="javascript:drawTable()">Table</a>
+    </div>
     <div class="abc">
       <div class="a">
         <div class="inputf">
@@ -88,14 +120,25 @@
     const form = document.getElementById("form");
     const weight = document.getElementById("weight");
 
-    window.onload = refresh;
+    window.onload = () => {
+      mode = false;
+      if((localStorage.getItem("Entries") ?? "").split(",").length >20){
+        chart() 
+      } else {
+        refresh()
+      }
+    };
 
     form.addEventListener("submit", newEntry);
     function newEntry() {
       event.preventDefault();
       localStorage.setItem("Entries", (localStorage.getItem("Entries") ?? "") + (localStorage.getItem("Entries") == null ? "" : ",") + weight.value);
       localStorage.setItem("Time", (localStorage.getItem("Time") ?? "") + (localStorage.getItem("Time") == null ? "" : ",") + Date.now());
-      refresh();
+      if (mode) {
+        chart();
+      } else {
+        refresh();
+      }
     }
 
     function refresh() {
@@ -116,6 +159,48 @@
           <td class="right">${d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear()}</td>
         </tr>`;
       }
+    }
+    function drawTable() {
+      mode = false;
+      refresh();
+      try {
+        let canvas = document.querySelector("canvas");
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+        canvas.parentNode.removeChild(canvas);
+      } catch {}
+    }
+    var mode;
+    function chart() {
+      if (document.querySelector("canvas")==null){
+        document.getElementsByClassName("a")[0].appendChild(document.createElement("canvas"));
+      }
+      let canvas = document.querySelector("canvas");
+      canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+      mode = true;
+      div.innerHTML = "";
+      var ctx = document.querySelector("canvas").getContext("2d");
+      var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: "line",
+
+        // The data for our dataset
+        data: {
+          labels: (localStorage.getItem("Time") ?? "").split(",").map((i) => {
+            let d = new Date(Number(i));
+            return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+          }),
+          datasets: [
+            {
+              label: "Weight",
+              backgroundColor: "rgb(255, 99, 132)",
+              borderColor: "rgb(255, 99, 132)",
+              data: (localStorage.getItem("Entries") ?? "").split(","),
+            },
+          ],
+        },
+        // Configuration options go here
+        options: {},
+      });
     }
   </script>
 </html>
